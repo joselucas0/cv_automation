@@ -1,6 +1,7 @@
 # --- Variaveis Sensiveis e Configurações locais ---
 .env
 *.env
+ideia.md
 CvAutomation.db
 CvAutomation.db-shm
 CvAutomation.db-wal
