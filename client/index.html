@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Resume Optimizer — Automação C#/.NET + Gemini</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-glow"></div>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <span class="icon">🚀</span>
+                <h1>ATS Resume <span class="gradient-text">Optimizer</span></h1>
+            </div>
+            <p class="subtitle">Otimização inteligente de currículos com .NET Backend, Channels & Gemini 2.5 Flash</p>
+        </header>
+
+        <main class="app-main">
+            <!-- Coluna de Input -->
+            <section class="card glass-card input-section">
+                <h2>1. Detalhes da Vaga</h2>
+                <p class="card-description">Cole a descrição completa ou os requisitos da vaga para a qual deseja se candidatar.</p>
+                
+                <div class="input-group">
+                    <label for="company-name">Nome da Empresa</label>
+                    <input 
+                        type="text" 
+                        id="company-name" 
+                        placeholder="Ex: Google, Nubank, Eleve Software..." 
+                    />
+                </div>
+                
+                <div class="input-group">
+                    <label for="job-title">Título da Vaga</label>
+                    <input 
+                        type="text" 
+                        id="job-title" 
+                        placeholder="Ex: Desenvolvedor Backend .NET Pleno..." 
+                    />
+                </div>
+                
+                <div class="input-group">
+                    <label for="job-description">Descrição do Cargo (Requisitos/Keywords)</label>
+                    <textarea 
+                        id="job-description" 
+                        placeholder="Ex: Procuramos desenvolvedor backend .NET pleno com experiência em microserviços, C#, Docker, PostgreSQL e RabbitMQ para mensageria assíncrona..."
+                    ></textarea>
+                </div>
+
+                <button id="btn-generate" class="btn btn-primary">
+                    <span class="btn-text">Otimizar Currículo</span>
+                    <span class="spinner hidden"></span>
+                </button>
+            </section>
+
+            <!-- Coluna de Output -->
+            <section class="card glass-card output-section">
+                <h2>2. Resultado Otimizado</h2>
+                
+                <!-- Estado Inicial/Vazio -->
+                <div id="output-placeholder" class="placeholder-state">
+                    <div class="placeholder-icon">📄</div>
+                    <h3>Pronto para gerar</h3>
+                    <p>Cole a descrição da vaga e clique em otimizar para iniciar as 4 chamadas de IA em paralelo na fila do backend.</p>
+                </div>
+
+                <!-- Estado de Carregamento (Loading) -->
+                <div id="output-loading" class="loading-state hidden">
+                    <div class="loader">
+                        <div class="inner-circle"></div>
+                    </div>
+                    <h3>Processando Currículo</h3>
+                    <p id="loading-step">Extraindo keywords ATS da vaga...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Estado de Sucesso (Resultado) -->
+                <div id="output-result" class="result-state hidden">
+                    <!-- Painel de Cobertura RAG -->
+                    <div id="coverage-panel" class="coverage-panel hidden">
+                        <div class="coverage-header">
+                            <span class="coverage-title">Aderência do Currículo</span>
+                            <span id="coverage-badge" class="coverage-badge"></span>
+                        </div>
+                        <div class="coverage-bar-bg">
+                            <div id="coverage-bar-fill" class="coverage-bar-fill"></div>
+                        </div>
+                        <p id="coverage-description" class="coverage-description"></p>
+                        <div id="coverage-warnings" class="coverage-warnings hidden"></div>
+                    </div>
+
+                    <div class="keywords-container">
+                        <h4>Keywords ATS Identificadas:</h4>
+                        <div id="keywords-list" class="keywords-chips">
+                            <!-- Chips das keywords -->
+                        </div>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Código LaTeX (.tex) Gerado</span>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button id="btn-download" class="btn btn-secondary btn-sm hidden">Baixar PDF 📥</button>
+                                <button id="btn-copy" class="btn btn-secondary btn-sm">Copiar LaTeX</button>
+                            </div>
+                        </div>
+                        <pre><code id="latex-output"></code></pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="app-footer">
+            <p>Desenvolvido com ❤️ em C# .NET 10 & TypeScript</p>
+        </footer>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
+</html>

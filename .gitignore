@@ -1,0 +1,36 @@
+# --- Variaveis Sensiveis e Configurações locais ---
+.env
+*.env
+CvAutomation.db
+CvAutomation.db-shm
+CvAutomation.db-wal
+src/CvAutomation.Api/CvAutomation.db
+src/CvAutomation.Api/CvAutomation.db-shm
+src/CvAutomation.Api/CvAutomation.db-wal
+
+# --- Exportações e Currículos Gerados ---
+exports/
+*.pdf
+*.tex
+*.aux
+*.log
+!curriculo.tex
+!templates/base_template.tex
+
+# --- .NET Build & VS ---
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- SO ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini

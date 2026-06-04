@@ -1,0 +1,105 @@
+\documentclass[a4paper,10pt]{article}
+
+% --- PACOTES ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{xurl}
+
+% --- CONFIGURAÇÃO ---
+\geometry{top=1.15cm, bottom=1.15cm, left=1.25cm, right=1.25cm}
+\setcounter{secnumdepth}{0}
+
+\setlist[itemize]{
+    leftmargin=1em,
+    itemsep=0.15em,
+    topsep=0.15em,
+    parsep=0em
+}
+
+\pagestyle{empty}
+
+\hypersetup{
+    pdftitle={{{PDF_TITLE}}},   % Título do PDF dinâmico
+    pdfauthor={{{FULL_NAME}}},  % Autor do PDF dinâmico
+    colorlinks=true,
+    urlcolor=black
+}
+
+\titleformat{\section}
+{\Large\bfseries}
+{}
+{0em}
+{}
+[\titlerule\vspace{0.2ex}]
+
+\newcounter{cventry}
+
+\newcommand{\cventry}[4]{%
+    \refstepcounter{cventry}
+    \phantomsection
+    \pdfbookmark[2]{#1}{cventry-\thecventry}
+    \noindent
+    \begin{tabularx}{\textwidth}{@{}X r@{}}
+    \textbf{#1} & #2 \\
+    \textit{#3} & \textit{#4} \\
+    \end{tabularx}
+}
+
+\begin{document}
+
+% --- HEADER ---
+\begin{center}
+    {\LARGE \textbf{{{FULL_NAME}}}}}
+    
+    {{LOCATION}} {\textbullet} (67) 99851-4455
+    
+    \href{mailto:{{EMAIL}}}{{{EMAIL}}}
+    {\textbullet}
+    \href{https://{{LINKEDIN}}}{{{LINKEDIN}}}
+    {\textbullet}
+    \href{https://{{GITHUB}}}{{{GITHUB}}}
+\end{center}
+
+% --- SOBRE MIM ---
+\section{Sobre mim}
+{{ABOUT_ME}}
+
+% --- SKILLS ---
+\section{Skills}
+\begin{itemize}
+    {{SKILLS_ITEMS}}
+\end{itemize}
+
+% --- EXPERIÊNCIA ---
+\section{Experiência}
+{{EXPERIENCES_SECTION}}
+
+% --- EDUCAÇÃO ---
+\section{Educação}
+\cventry{Universidade Federal de Mato Grosso do Sul (UFMS)}{Campo Grande, MS}{Bacharelado em Engenharia de Software}{2022 -- 2026}
+
+% --- RECOMENDAÇÕES ---
+\section{Recomendações}
+
+\cventry{Gabriel Colman Rodrigues}{Supervisor Técnico}{Recomendação Profissional}{2025}
+\begin{itemize}
+    \item “José demonstrou comprometimento, organização e facilidade em trabalhar em equipe, contribuindo ativamente com desenvolvimento backend, integrações e qualidade de software.”
+\end{itemize}
+
+\cventry{Felipe Pedrozo}{Equipe de Desenvolvimento - Digix}{Recomendação Profissional}{2025}
+\begin{itemize}
+    \item “Sempre demonstrou dedicação, aprendizado rápido e comprometimento com entregas e colaboração técnica com o time.”
+\end{itemize}
+
+\end{document}

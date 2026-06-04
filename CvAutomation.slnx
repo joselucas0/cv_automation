@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CvAutomation.Api/CvAutomation.Api.csproj" />
+    <Project Path="src/CvAutomation.Application/CvAutomation.Application.csproj" />
+    <Project Path="src/CvAutomation.Domain/CvAutomation.Domain.csproj" />
+    <Project Path="src/CvAutomation.Infrastructure/CvAutomation.Infrastructure.csproj" />
+  </Folder>
+</Solution>
