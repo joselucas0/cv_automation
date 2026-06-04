@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: src/CvAutomation.Api/Dockerfile
+    ports:
+      - "5005:5005"
+    env_file:
+      - .env
+    volumes:
+      - ./exports:/app/exports
+      - ./src/CvAutomation.Api/CvAutomation.db:/app/CvAutomation.db
+    restart: always
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./client:/usr/share/nginx/html
+    restart: always
