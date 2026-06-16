@@ -204,6 +204,58 @@ public class ResumeOrchestrationService : IResumeOrchestrationService
             }, ct);
 
             // 3. Tasks concorrentes para as 4 experiências selecionadas sob regras de senioridade
+            // Ênfases temáticas por empresa para garantir diversidade entre experiências geradas
+            var companyEmphasis = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["eleve"] = "ÊNFASE TEMÁTICA OBRIGATÓRIA DESTA EMPRESA: Destaque POCs, entregas inovadoras, acompanhamento de projetos do início ao fim, desenvolvimento hands-on e tomadas de decisões técnicas.",
+                ["digix"] = "ÊNFASE TEMÁTICA OBRIGATÓRIA DESTA EMPRESA: Destaque backend robusto, qualidade de código, IA, dados e entregas concretas de valor.",
+                ["sigeamb"] = "ÊNFASE TEMÁTICA OBRIGATÓRIA DESTA EMPRESA: Destaque infraestrutura, deploy, DevOps, banco de dados e arquitetura backend.",
+                ["decubitocare"] = "ÊNFASE TEMÁTICA OBRIGATÓRIA DESTA EMPRESA: Destaque qualidade de software, testes, domínio hospitalar, implantação e DevOps."
+            };
+
+            // Pré-distribui items do pool entre empresas para diversidade mecânica (cada empresa recebe subset disjunto)
+            var distributedPoolItems = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            string? resolvedPoolStack = null;
+
+            if (!isJunior)
+            {
+                string? resolvedPoolContent = null;
+
+                if (isLowCoverage)
+                {
+                    resolvedPoolStack = scoredPools.Count >= 2 
+                        ? $"{scoredPools[0].Block.StackContext} e {scoredPools[1].Block.StackContext}"
+                        : (scoredPools.FirstOrDefault()?.Block.StackContext ?? "desenvolvimento de software");
+
+                    if (scoredPools.Count >= 2)
+                        resolvedPoolContent = $"{scoredPools[0].Block.Content}\n{scoredPools[1].Block.Content}";
+                    else if (scoredPools.Any())
+                        resolvedPoolContent = scoredPools[0].Block.Content;
+                }
+                else if (bestPool != null)
+                {
+                    resolvedPoolContent = bestPool.Content;
+                    resolvedPoolStack = bestPool.StackContext;
+                }
+
+                if (resolvedPoolContent != null)
+                {
+                    var poolLines = resolvedPoolContent
+                        .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                        .Where(l => l.TrimStart().StartsWith("*"))
+                        .ToList();
+
+                    for (int i = 0; i < poolLines.Count; i++)
+                    {
+                        var targetExp = selectedExperiences[i % selectedExperiences.Count];
+                        var key = targetExp.CompanyKey;
+                        if (!distributedPoolItems.ContainsKey(key))
+                            distributedPoolItems[key] = new List<string>();
+                        distributedPoolItems[key].Add(poolLines[i]);
+                    }
+                }
+            }
+
             foreach (var exp in selectedExperiences)
             {
                 var companyKey = exp.CompanyKey.ToLower();
@@ -211,37 +263,28 @@ public class ResumeOrchestrationService : IResumeOrchestrationService
                 string baseItems = exp.Content;
                 string companyContext = string.Empty;
 
-                if (!isJunior) // PLENO / SÊNIOR
+                if (!isJunior) // PLENO / SÊNIOR — Items distribuídos por empresa
                 {
                     if (isLowCoverage)
                     {
-                        var combinedStack = scoredPools.Count >= 2 
-                            ? $"{scoredPools[0].Block.StackContext} e {scoredPools[1].Block.StackContext}"
-                            : (scoredPools.FirstOrDefault()?.Block.StackContext ?? "desenvolvimento de software");
-
-                        companyContext = $"O candidato NÃO possui experiência direta na stack desejada ({targetTitle}). Porém, possui experiências transferíveis relevantes em {combinedStack}. " +
+                        companyContext = $"O candidato NÃO possui experiência direta na stack desejada ({targetTitle}). Porém, possui experiências transferíveis relevantes em {resolvedPoolStack ?? "desenvolvimento de software"}. " +
                                          $"Sua missão é gerar uma descrição de cargo e conquistas focadas em engenharia de software pura, conceitos transferíveis de arquitetura, REST, SOLID e boas práticas, sem citar tecnologias que ele não domina. " +
                                          $"Mantenha todas as experiências reais, mas abstraídas de linguagem.";
 
-                        if (scoredPools.Count >= 2)
+                        if (distributedPoolItems.TryGetValue(companyKey, out var poolSubset) && poolSubset.Any())
                         {
-                            baseItems = $"{scoredPools[0].Block.Content}\n{scoredPools[1].Block.Content}";
-                            baseActuation = $"Engenharia de sistemas corporativos complexos, focando em robustez, escalabilidade e qualidade técnica multi-tecnologias, incluindo {combinedStack}.";
-                        }
-                        else if (scoredPools.Any())
-                        {
-                            baseItems = scoredPools[0].Block.Content;
-                            baseActuation = $"Engenharia de sistemas com foco em arquitetura, qualidade e entrega de valor em {scoredPools[0].Block.StackContext}.";
+                            baseItems = $"{exp.Content}\n{string.Join("\n", poolSubset)}";
+                            baseActuation = $"{exp.SemanticContent} Aplicando conceitos transferíveis de engenharia, arquitetura e qualidade técnica em {resolvedPoolStack ?? "desenvolvimento de software"}.";
                         }
                     }
                     else
                     {
-                        // Pleno: adaptabilidade completa para a stack detectada
-                        companyContext = $"Esta empresa deve refletir plenamente a stack principal solicitada na vaga ({bestPool?.StackContext ?? "stack da vaga"}) para fortalecer a senioridade Pleno/Sênior. Permissível citar Git e banco de dados.";
-                        if (bestPool != null)
+                        // Pleno: cada empresa recebe subset disjunto do pool + seus dados factuais reais
+                        companyContext = $"Esta empresa deve refletir plenamente a stack principal solicitada na vaga ({resolvedPoolStack ?? "stack da vaga"}) para fortalecer a senioridade Pleno/Sênior. Permissível citar Git e banco de dados.";
+                        if (distributedPoolItems.TryGetValue(companyKey, out var poolSubset) && poolSubset.Any())
                         {
-                            baseItems = bestPool.Content;
-                            baseActuation = $"Desenvolvimento de software de alta performance e evolução de sistemas corporativos com foco em {bestPool.StackContext}.";
+                            baseItems = $"{exp.Content}\n{string.Join("\n", poolSubset)}";
+                            baseActuation = $"{exp.SemanticContent} Com foco em {resolvedPoolStack ?? "stack da vaga"}.";
                         }
                     }
                 }
@@ -295,6 +338,14 @@ public class ResumeOrchestrationService : IResumeOrchestrationService
                         // DecubitoCare: Especialidade técnica (QA, testes, arquitetura, implantação, desenvolvimento)
                         companyContext = "Para esta vaga Júnior, a atuação no Hospital Universitário (HU-UFMS) é focada em garantia de qualidade de software, testes automatizados (Cypress, testes de API, funcionais), arquitetura, implantação e desenvolvimento de soluções de saúde. Mantenha essa especialidade em qualidade de software, testes e implantação. Permissível citar Git e banco de dados.";
                     }
+                }
+
+                // Injeta ênfase temática para diversificar experiências (não altera performance)
+                if (companyEmphasis.TryGetValue(companyKey, out var emphasis))
+                {
+                    companyContext = string.IsNullOrEmpty(companyContext)
+                        ? emphasis
+                        : $"{companyContext}\n{emphasis}";
                 }
 
                 await channel.Writer.WriteAsync(new GenerationTask
@@ -389,6 +440,58 @@ public class ResumeOrchestrationService : IResumeOrchestrationService
         }
 
         var latexContent = _latexTemplateService.GenerateLatex(titleAndAbout, skills, experiencesLatex.ToString());
+
+        // ═══════════════════════════════════════════
+        // ETAPA 4.5 — Cálculo de aderência real e injeção de keywords faltantes
+        // ═══════════════════════════════════════════
+        var targetKeywords = keywords.HardSkills.Concat(keywords.Tools).Distinct().ToList();
+        var latexLower = latexContent.ToLower();
+        var matchedKeywords = targetKeywords.Where(k => latexLower.Contains(k.ToLower())).ToList();
+        var realCoverage = targetKeywords.Count > 0 
+            ? (double)matchedKeywords.Count / targetKeywords.Count 
+            : 1.0;
+
+        if (realCoverage < 0.80 && targetKeywords.Count > 0)
+        {
+            // Reúne todas as skills reais do candidato para validação
+            var candidateSkills = skillBlocks
+                .SelectMany(b => {
+                    try { return JsonSerializer.Deserialize<List<string>>(b.Content) ?? new List<string>(); }
+                    catch { return new List<string>(); }
+                })
+                .Select(s => s.ToLower().Trim())
+                .ToHashSet();
+
+            var missingKeywords = targetKeywords
+                .Where(k => !latexLower.Contains(k.ToLower()))
+                .Where(k => candidateSkills.Any(cs => 
+                    cs.Contains(k.ToLower()) || k.ToLower().Contains(cs)))
+                .ToList();
+
+            if (missingKeywords.Any())
+            {
+                // Injeta keywords faltantes como categoria extra na seção de Skills
+                var escapedKeywords = missingKeywords
+                    .Select(k => k.Replace("#", "\\#").Replace("&", "\\&").Replace("%", "\\%"))
+                    .ToList();
+                var extraSkillLine = $"\n\\item \\textbf{{Complementares:}} {string.Join(", ", escapedKeywords)}";
+
+                // Insere antes do fechamento da seção de Skills
+                var skillsEndMarker = "\\end{itemize}\n\n% --- EXPERIÊNCIA";
+                if (latexContent.Contains(skillsEndMarker))
+                {
+                    latexContent = latexContent.Replace(skillsEndMarker, 
+                        $"{extraSkillLine}\n\\end{{itemize}}\n\n% --- EXPERIÊNCIA");
+                }
+
+                // Recalcula cobertura
+                latexLower = latexContent.ToLower();
+                matchedKeywords = targetKeywords.Where(k => latexLower.Contains(k.ToLower())).ToList();
+                realCoverage = (double)matchedKeywords.Count / targetKeywords.Count;
+            }
+        }
+
+        coverageScore = realCoverage;
 
         // ═══════════════════════════════════════════
         // ETAPA 5 — Geração do PDF & Exportações Físicas

@@ -43,7 +43,11 @@ if (File.Exists(envPath))
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Carregar appsettings.local.json se existir para permitir overrides locais
+builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+
 // 1. Configurar as opções (Settings) do appsettings.json
+
 builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAi"));
 builder.Services.Configure<PersonalInfoSettings>(builder.Configuration.GetSection("PersonalInfo"));
 builder.Services.Configure<TemplateSettings>(builder.Configuration.GetSection("Template"));

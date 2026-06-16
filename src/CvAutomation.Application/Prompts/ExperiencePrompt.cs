@@ -22,11 +22,13 @@ REGRAS GERAIS:
 1. Reescreva o parágrafo de atuação base de forma a incorporar as keywords relevantes da vaga NATURALMENTE. Ele deve ser um texto curto (2 a 3 linhas).
 2. Reordene as entregas (itens) colocando as mais relevantes para a vaga PRIMEIRO.
 3. Ajuste a redação de cada item para destacar keywords pedidas, sem alterar o sentido factual ou inventar dados/métricas.
-4. Siga RIGOROSAMENTE as Diretrizes e Regras Desta Experiência acima (ex: se for Júnior e restrita a certas stacks, não fale de outras).
-5. Em qualquer empresa, é perfeitamente aceitável e incentivado mencionar Git/GitHub/Git Flow e Banco de Dados (PostgreSQL, SQL Server, SQL) se fizer sentido.
-6. Use escape LaTeX corretamente (escreva C\# em vez de C#, \% em vez de %, & em vez de \& ou similar - no LaTeX o & comercial deve ser escrito como \&).
-7. Mantenha o formato com \item para cada entrega.
-8. NÃO inclua \begin{itemize} ou \end{itemize} — retorne apenas os \item's.
+4. Gere no MÍNIMO 4 e no MÁXIMO 7 \item's por experiência. Se os dados base não forem suficientes para 4 items, expanda os items existentes com mais detalhe técnico relevante à vaga (ex: mencionar ferramentas, práticas e conceitos adjacentes), sem inventar dados ou métricas falsas.
+5. Siga RIGOROSAMENTE as Diretrizes e Regras Desta Experiência acima (ex: se for Júnior e restrita a certas stacks, não fale de outras).
+6. Em qualquer empresa, é perfeitamente aceitável e incentivado mencionar Git/GitHub/Git Flow e Banco de Dados (PostgreSQL, SQL Server, SQL) se fizer sentido.
+7. Use escape LaTeX corretamente (escreva C\# em vez de C#, \% em vez de %, & em vez de \& ou similar - no LaTeX o & comercial deve ser escrito como \&).
+8. Mantenha o formato com \item para cada entrega.
+9. NÃO inclua \begin{itemize} ou \end{itemize} — retorne apenas os \item's.
+10. NUNCA use palavras em CAPSLOCK/maiúsculas consecutivas no texto gerado (ex: não escreva ""ENGENHARIA DE SOFTWARE"", escreva ""Engenharia de Software""). O texto final deve usar capitalização normal de frase.
 
 Retorne APENAS JSON válido no formato:
 {

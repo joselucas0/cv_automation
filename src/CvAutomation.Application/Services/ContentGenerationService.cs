@@ -3,32 +3,39 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CvAutomation.Application.Interfaces;
+using CvAutomation.Application.Options;
 using CvAutomation.Application.Prompts;
 using CvAutomation.Domain.Models;
+using Microsoft.Extensions.Options;
 
 namespace CvAutomation.Application.Services;
 
 public class ContentGenerationService : IContentGenerationService
 {
     private readonly IAiService _aiService;
+    private readonly PersonalInfoSettings _personalInfo;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public ContentGenerationService(IAiService aiService)
+    public ContentGenerationService(IAiService aiService, IOptions<PersonalInfoSettings> personalInfo)
     {
         _aiService = aiService;
+        _personalInfo = personalInfo.Value;
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         };
     }
 
+
     public async Task<TitleAndAboutContent> GenerateTitleAndAboutAsync(AtsKeywords keywords, string jobTitle, string baseAboutMe, CancellationToken ct = default)
     {
         var keywordsJson = JsonSerializer.Serialize(keywords, _jsonOptions);
         var prompt = TitleAndAboutPrompt.Template
+            .Replace("{fullName}", _personalInfo.FullName)
             .Replace("{keywordsJson}", keywordsJson)
             .Replace("{jobTitle}", jobTitle)
             .Replace("{baseAboutMe}", baseAboutMe);
+
         var jsonResponse = await _aiService.GenerateContentAsync(prompt, ct);
 
         try
@@ -74,6 +81,11 @@ public class ContentGenerationService : IContentGenerationService
                 {
                     skillsLatexValue = prop.GetString() ?? string.Empty;
                 }
+
+                if (skillsLatexValue.Contains("\\n"))
+                {
+                    skillsLatexValue = skillsLatexValue.Replace("\\n", "\n");
+                }
             }
             
             return new SkillsContent { SkillsLatex = skillsLatexValue };
@@ -113,6 +125,11 @@ public class ContentGenerationService : IContentGenerationService
         try
         {
             var content = JsonSerializer.Deserialize<ExperienceContent>(jsonResponse, _jsonOptions);
+            if (content != null)
+            {
+                content.ExperienceItems = content.ExperienceItems.Replace("\\n", "\n");
+                content.ExperienceSummary = content.ExperienceSummary.Replace("\\n", "\n");
+            }
             return content ?? throw new InvalidOperationException($"Falha ao desserializar experiência: {experienceName}");
         }
         catch (JsonException ex)

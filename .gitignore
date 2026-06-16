@@ -8,6 +8,11 @@ CvAutomation.db-wal
 src/CvAutomation.Api/CvAutomation.db
 src/CvAutomation.Api/CvAutomation.db-shm
 src/CvAutomation.Api/CvAutomation.db-wal
+appsettings.local.json
+*.local.json
+base/*.local.md
+*.local.md
+
 
 # --- Exportações e Currículos Gerados ---
 exports/

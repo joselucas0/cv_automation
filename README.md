@@ -123,7 +123,33 @@ graph TD
 
 ---
 
+## ⚙️ Adaptação para Uso Pessoal (Customização)
+
+
+Por padrão, o repositório vem configurado com as informações e experiências profissionais do autor como exemplo. Qualquer pessoa pode clonar este repositório e adaptá-lo completamente para seu próprio uso de forma muito simples:
+
+### 1. Dados Pessoais & Histórico Profissional
+O sistema utiliza o arquivo `src/CvAutomation.Api/appsettings.json` para mapear suas informações de cabeçalho e dados de experiências. Para customizar sem alterar os arquivos rastreados no Git:
+1. Crie uma cópia de `src/CvAutomation.Api/appsettings.json` chamada `appsettings.local.json` na mesma pasta (esse arquivo já está no `.gitignore`).
+2. No seu `appsettings.local.json`, altere o bloco `PersonalInfo` com seu nome, e-mail, telefone, links e localização.
+3. Altere o bloco `Experiences` adicionando ou editando as empresas onde você trabalhou.
+
+### 2. Base de Dados RAG (Markdown)
+A busca semântica do SQLite lê os arquivos markdown em `base/` para indexar seus blocos de currículo. Para usar suas próprias habilidades, resumos e experiências sem mexer nos arquivos do Git:
+1. Copie os arquivos da pasta `base/` criando equivalentes com sufixo `.local.md`:
+   - `base/sobreMim.md` ➔ `base/sobreMim.local.md`
+   - `base/skills.md` ➔ `base/skills.local.md`
+   - `base/exp.md` ➔ `base/exp.local.md`
+2. Edite os novos arquivos `.local.md` com seus dados reais mantendo a mesma estrutura de títulos e tópicos.
+3. Rode o script de semeadura (`python scripts/seed_database.py`). Ele detectará automaticamente seus arquivos locais e os usará para povoar o banco SQLite.
+
+### 3. Template LaTeX
+O design estético do PDF gerado é baseado no arquivo `templates/base_template.tex`. Você pode alterá-lo livremente para adequar seções estáticas, como formação acadêmica (Educação) e Recomendações. O compilador preenche as tags `{{FULL_NAME}}`, `{{EMAIL}}`, `{{PHONE}}`, `{{LOCATION}}`, `{{LINKEDIN}}`, `{{GITHUB}}`, `{{ABOUT_ME}}`, `{{SKILLS_ITEMS}}` e `{{EXPERIENCES_SECTION}}` em tempo de execução.
+
+---
+
 ## ⚡ Quick Start
+
 
 ### 1. Clonar o Repositório
 ```bash

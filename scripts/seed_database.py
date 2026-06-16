@@ -206,10 +206,12 @@ def main():
     
     base_dir = os.path.join(os.path.dirname(__file__), "..", "base")
     
-    # 1. Seed summaries from sobreMim.md
-    print("Seeding summaries from sobreMim.md...")
-    sobre_mim_path = os.path.join(base_dir, "sobreMim.md")
+    # 1. Seed summaries from sobreMim.md (or sobreMim.local.md if exists)
+    sobre_mim_local_path = os.path.join(base_dir, "sobreMim.local.md")
+    sobre_mim_path = sobre_mim_local_path if os.path.exists(sobre_mim_local_path) else os.path.join(base_dir, "sobreMim.md")
+    print(f"Seeding summaries from {os.path.basename(sobre_mim_path)}...")
     summaries = parse_sobre_mim(sobre_mim_path)
+
     for s in summaries:
         title = s["title"]
         content = s["content"]
@@ -241,9 +243,10 @@ def main():
             "", "", 0, "", now, now
         ))
         
-    # 2. Seed skills from skills.md
-    print("Seeding skills from skills.md...")
-    skills_path = os.path.join(base_dir, "skills.md")
+    # 2. Seed skills from skills.md (or skills.local.md if exists)
+    skills_local_path = os.path.join(base_dir, "skills.local.md")
+    skills_path = skills_local_path if os.path.exists(skills_local_path) else os.path.join(base_dir, "skills.md")
+    print(f"Seeding skills from {os.path.basename(skills_path)}...")
     skills_categories = parse_skills(skills_path)
     for sc in skills_categories:
         cat = sc["category"]
@@ -269,10 +272,12 @@ def main():
             cat, "", 0, "", now, now
         ))
         
-    # 3. Seed exp.md pools
-    print("Seeding experience pools from exp.md...")
-    exp_path = os.path.join(base_dir, "exp.md")
+    # 3. Seed exp.md pools (or exp.local.md if exists)
+    exp_local_path = os.path.join(base_dir, "exp.local.md")
+    exp_path = exp_local_path if os.path.exists(exp_local_path) else os.path.join(base_dir, "exp.md")
+    print(f"Seeding experience pools from {os.path.basename(exp_path)}...")
     exp_pools = parse_experience_pools(exp_path)
+
     for p in exp_pools:
         title = p["title"]
         stack = p["stack"]
@@ -299,54 +304,32 @@ def main():
             stack, "", 0, "", now, now
         ))
         
-    # 4. Seed 4 company experiences
-    print("Seeding 4 company experiences...")
-    appsettings_path = os.path.join(os.path.dirname(__file__), "..", "src", "CvAutomation.Api", "appsettings.json")
-    with open(appsettings_path, "r", encoding="utf-8") as f:
-        appsettings = json.load(f)
-        
-    experiences_config = appsettings["CandidateData"]["Experiences"]
+    # 4. Seed company experiences dynamically from configuration
+    print("Seeding company experiences dynamically from configuration...")
+    appsettings_dir = os.path.join(os.path.dirname(__file__), "..", "src", "CvAutomation.Api")
+    appsettings_local_path = os.path.join(appsettings_dir, "appsettings.local.json")
+    appsettings_path = os.path.join(appsettings_dir, "appsettings.json")
     
-    companies_metadata = {
-        "eleve": {
-            "Company": "Eleve Software",
-            "Period": "Set 2025 -- Atual",
-            "Location": "Campo Grande, MS",
-            "IsWildcard": 1,
-            "JuniorSpecialties": "Qualquer stack solicitada na vaga (coringa)",
-            "Priority": 5
-        },
-        "digix": {
-            "Company": "Digix",
-            "Period": "Ago 2024 -- Set 2025",
-            "Location": "Campo Grande, MS",
-            "IsWildcard": 0,
-            "JuniorSpecialties": "C# / .NET, IA / Inteligência Artificial, análise de dados, qualidade de código, entregas, automações, Git, banco de dados",
-            "Priority": 4
-        },
-        "sigeamb": {
-            "Company": "Laboratório de Análise da Qualidade da Água - UFMS",
-            "Period": "Jul 2025 -- Dez 2025",
-            "Location": "Campo Grande, MS",
-            "IsWildcard": 0,
-            "JuniorSpecialties": "Arquitetura backend, modelagem de banco de dados PostgreSQL, deploys, Docker, Nginx como proxy reverso, Git, banco de dados",
-            "Priority": 3
-        },
-        "decubitocare": {
-            "Company": "Hospital Universitário - HU-UFMS",
-            "Period": "Jan 2025 -- Jul 2025",
-            "Location": "Campo Grande, MS",
-            "IsWildcard": 0,
-            "JuniorSpecialties": "Garantia de qualidade de software, automação de testes (Cypress, testes de API, funcionais, regressão), arquitetura, implantação, desenvolvimento, CI/CD, Git, banco de dados",
-            "Priority": 2
-        }
-    }
+    if os.path.exists(appsettings_local_path):
+        print("Loading experiences from appsettings.local.json...")
+        with open(appsettings_local_path, "r", encoding="utf-8") as f:
+            appsettings = json.load(f)
+    else:
+        print("Loading experiences from appsettings.json...")
+        with open(appsettings_path, "r", encoding="utf-8") as f:
+            appsettings = json.load(f)
+            
+    experiences_config = appsettings.get("CandidateData", {}).get("Experiences", {})
     
-    for key, meta in companies_metadata.items():
-        config = experiences_config[key]
-        company_name = config["CompanyName"]
-        base_actuation = config["BaseActuation"]
-        base_items = config["BaseItems"]
+    for key, config in experiences_config.items():
+        company_name = config.get("CompanyName", "")
+        base_actuation = config.get("BaseActuation", "")
+        base_items = config.get("BaseItems", "")
+        period = config.get("Period", "")
+        location = config.get("Location", "")
+        is_wildcard = 1 if config.get("IsWildcard", False) else 0
+        junior_specialties = config.get("JuniorSpecialties", "")
+        priority = config.get("Priority", 1)
         
         semantic_content = f"Empresa: {company_name}. Atuação Geral: {base_actuation}. Conquistas: {base_items}"
         print(f"  -> Generating embedding for company experience: {company_name}...")
@@ -362,14 +345,15 @@ def main():
             StackContext, CompanyKey, IsWildcard, JuniorSpecialties, CreatedAt, UpdatedAt
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            block_id, "experience", "Desenvolvedor de Software", company_name, meta["Location"], meta["Period"],
-            base_items, base_actuation, "[]", "[]", "pleno", meta["Priority"], 1, json.dumps(emb),
-            "", key, meta["IsWildcard"], meta["JuniorSpecialties"], now, now
+            block_id, "experience", "Desenvolvedor de Software", company_name, location, period,
+            base_items, base_actuation, "[]", "[]", "pleno", priority, 1, json.dumps(emb),
+            "", key, is_wildcard, junior_specialties, now, now
         ))
         
     conn.commit()
     conn.close()
     print("Successfully seeded all data in CvAutomation.db!")
+
 
 if __name__ == "__main__":
     main()

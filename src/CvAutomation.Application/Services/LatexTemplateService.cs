@@ -47,7 +47,9 @@ public class LatexTemplateService : ILatexTemplateService
             .Replace("{{LOCATION}}", _personalInfo.Location)
             .Replace("{{EMAIL}}", _personalInfo.Email)
             .Replace("{{LINKEDIN}}", _personalInfo.LinkedIn)
-            .Replace("{{GITHUB}}", _personalInfo.GitHub);
+            .Replace("{{GITHUB}}", _personalInfo.GitHub)
+            .Replace("{{PHONE}}", _personalInfo.Phone);
+
 
         return result;
     }
